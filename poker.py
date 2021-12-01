@@ -2,6 +2,7 @@ import random
 import itertools
 
 from enum import Enum, auto
+from collections import Counter
 
 class Suit(Enum):
     CLUB = auto()
@@ -114,12 +115,56 @@ class poker():
         return res
     
     #Check when hand is Four of a Kind
-    #TODO
-    def checkFourOfAKind(hand):
-        res = False
-        kind = 0
+    def checkFourOfAKind(count):
+        if(count == (4,1)):
+            return True
+        else:
+            return False
+    
+    #Check when hand is Full House
+    def checkFullHouse(count):
+        if(count == (3,2)):
+            return True
+        else:
+            return False
+    
+    #Check when hand is Two Pairs
+    def checkTwoPairs(count):
+        if(count == (2,2)):
+            return True
+        else:
+            return False
+    
+    #Check when hand is Three of a Kind
+    def checkThreeOfAKind(count):
+        if(count == (3,1)):
+            return True
+        else:
+            return False
+    
+    #Check when hand is Pair
+    def checkPair(count):
+        if(count == (2,1)):
+            return True
+        else:
+            return False
+
+    def checkHighCard(hand):
+        highest = hand.cards[0]
         for card in hand.cards:
-            card.value.value
+            if(highest < card):
+                highest = card
+        return highest.value.value
+
+    #Counts how common a value is in a hand
+    def countCards(hand):
+        handvalues = []
+        for cardvalues in hand.cards:
+            handvalues.append(cardvalues.value.value)
+        counting_cards = Counter(handvalues)
+        #Count Structure: (Number of Repeated Values, Amount of Sets with repeated values)
+        most_common_values, count = zip(*counting_cards.most_common(2))
+        return count
             
     #Controls the value of all the hands in play in Classic Poker
     #Hand values:
@@ -151,17 +196,36 @@ class poker():
                 return value
         #Other hands
         else:
-            #Four of a Kind TODO
-            poker.checkFourOfAKind(hand)
-            poker.checkFullHouse(hand)
-            if(poker.checkStraight(hand)):
+            #Counting if hand is repeated
+            #Most of these checks could be added here, but this allows for modularity
+            count = poker.countCards(hand)
+            #Four of a Kind
+            if(poker.checkFourOfAKind(count)):
+                value = 80
+                return value
+            #Full House    
+            elif(poker.checkFullHouse(count)):
+                value = 70
+                return value
+            #Straight
+            elif(poker.checkStraight(hand)):
                 value = 50
                 return value
-            poker.checkThreeOfAKind(hand)
-            poker.checkTwoPairs(hand)
-            poker.checkPair(hand)
-            #
-            poker.checkHighCard(hand)
+            #Three of a Kind
+            elif(poker.checkThreeOfAKind(count)):
+                value = 40
+                return value
+            #Two Pairs
+            elif(poker.checkTwoPairs(count)):
+                value = 30
+                return value
+            #Single Pair
+            elif(poker.checkPair(count)):
+                value = 20
+                return value
+            else:
+                value = poker.checkHighCard(hand)
+                return value
             
 
     def dealer(np):
@@ -172,7 +236,6 @@ class poker():
         #Deck Creation
         deck = Deck()
         random.shuffle(deck.cards)
-        print(deck)
         print("Deck Card Count: " + str(len(deck.cards)))
         #Dealing
         for i in range(int(np)):
@@ -182,24 +245,77 @@ class poker():
             for c in range(5):
                 card = random.choice(deck.cards)
                 deck.cards.remove(card)
+                deckCheck = deck.cards
+                deckCheck.sort()
                 hand.cards.append(card)
             hands.append(hand)
         return hands
+
+    #Round Resolver
+    def roundResolver(hands):
+        storedHandValues = []
+        for hand in hands:
+            storedHandValues.append(poker.checkHandValue(hand))
+        
+        highestValue = 0
+        winner = 0
+        for i in range (len(hands)):
+            if(storedHandValues[i] > highestValue):
+                highestHand = hands[i]
+                highestValue = storedHandValues[i]
+                winner = i
+            elif(storedHandValues[i] == highestValue):
+                current = poker.checkHighCard(highestHand)
+                evaluated = poker.checkHighCard(hands[i])
+                if(evaluated > current):
+                    highestValue = storedHandValues[i]
+                    highestHand = hands[i]
+                    winner = i
+        
+        print("The Player Number " + str(winner + 1) + " with the following hand:\n" + str(highestHand) + "\nis the winner of the round with a " + poker.handValueToString(storedHandValues[winner]))
+        poker.rounds(len(storedHandValues))
+    
+    #HandValue to String Auxiliary Function
+    def handValueToString(handValue):
+        possibleHands = {
+        100 : "Royal Flush",
+        90 : "Straight Flush",
+        80 : "Four of a Kind",
+        70 : "Full House",
+        60 : "Flush",
+        50 : "Straight",
+        40 : "Three of a Kind",
+        30 : "Two Pair",
+        20 : "Pair",
+        13 : "Ace",
+        12 : "King",
+        11 : "Queen",
+        10 : "Jack",
+        9 : "Ten",
+        8 : "Nine",
+        7 : "Eight",
+        6 : "Seven",
+        5 : "Six",
+        4 : "Five",
+        3 : "Four",
+        2 : "Three",
+        1 : "Two"
+        }
+        return possibleHands[handValue]
+                    
 
     #Round Controller
     def rounds(np):
         quit = 0
         while(quit != 'y' and quit != 'n'):
-            quit = input("Continue? \n 'y' \n 'n'")
+            quit = input("Start next round? \n 'y' \n 'n'")
             if(quit.isalnum() and quit == 'n'):
                 print("See you soon.")
                 break
             elif(quit.isalnum() and quit == 'y'):
                 print("Lets go: ")
                 hands = poker.dealer(np)
-                print(hands)
-                for hand in hands:
-                    poker.checkHandValue(hand)
+                poker.roundResolver(hands)
             else:
                 print("Please, type 'y' or 'n' only")
 
@@ -231,7 +347,7 @@ class poker():
 
 class testCases():
     def royalFlushHand():
-        print("This is a royal flush test")
+        print("\n1 - This is a royal flush test")
         hand = Hand() 
         hand.cards.append(Card(Suit.DIAMOND,Value.ACE))
         hand.cards.append(Card(Suit.DIAMOND,Value.JACK))
@@ -239,11 +355,11 @@ class testCases():
         hand.cards.append(Card(Suit.DIAMOND,Value.QUEEN))
         hand.cards.append(Card(Suit.DIAMOND,Value.KING))
         res = poker.checkHandValue(hand)
-        print("HAND VALUE: " + str(res))
+        print("1 - HAND VALUE: " + poker.handValueToString(res))
         assert(res == 100)
 
     def royalStraightFlushHand():
-        print("This is a straight flush test")
+        print("\n2 - This is a straight flush test")
         hand = Hand() 
         hand.cards.append(Card(Suit.CLUB,Value.TWO))
         hand.cards.append(Card(Suit.CLUB,Value.THREE))
@@ -251,11 +367,11 @@ class testCases():
         hand.cards.append(Card(Suit.CLUB,Value.FIVE))
         hand.cards.append(Card(Suit.CLUB,Value.SIX))
         res = poker.checkHandValue(hand)
-        print("HAND VALUE: " + str(res))
+        print("2 - HAND VALUE: " + poker.handValueToString(res))
         assert(res == 90)
     
     def lowValueAce():
-        print("This tests the only case in which the ACE counts as a 1 value \nThis results in a Straight Flush")
+        print("\n3 - This tests the only case in which the ACE counts as a 1 value \nThis results in a Straight Flush")
         hand = Hand() 
         hand.cards.append(Card(Suit.CLUB,Value.ACE))
         hand.cards.append(Card(Suit.CLUB,Value.THREE))
@@ -263,8 +379,57 @@ class testCases():
         hand.cards.append(Card(Suit.CLUB,Value.FIVE))
         hand.cards.append(Card(Suit.CLUB,Value.TWO))
         res = poker.checkHandValue(hand)
-        print("HAND VALUE: " + str(res))
+        print("3 - HAND VALUE: " + poker.handValueToString(res))
         assert(res == 90)
+    
+    def regularStraight():
+        print("\n4 - This is a straight test")
+        hand = Hand() 
+        hand.cards.append(Card(Suit.DIAMOND,Value.TWO))
+        hand.cards.append(Card(Suit.CLUB,Value.THREE))
+        hand.cards.append(Card(Suit.CLUB,Value.FOUR)) 
+        hand.cards.append(Card(Suit.CLUB,Value.FIVE))
+        hand.cards.append(Card(Suit.CLUB,Value.SIX))
+        res = poker.checkHandValue(hand)
+        print("4 - HAND VALUE: " + poker.handValueToString(res))
+        assert(res == 50)
+    
+    def pairHand():
+        print("\n5 - Tests a Hand with a Pair")
+        hand = Hand()
+        hand.cards.append(Card(Suit.CLUB, Value.ACE))
+        hand.cards.append(Card(Suit.DIAMOND, Value.ACE))
+        hand.cards.append(Card(Suit.DIAMOND, Value.TWO))
+        hand.cards.append(Card(Suit.SPADE, Value.FIVE))
+        hand.cards.append(Card(Suit.HEART, Value.TEN))
+        res = poker.checkHandValue(hand)
+        print("5 - HAND VALUE: " + poker.handValueToString(res))
+        assert(res == 20)
+
+    def threeOfAKind():
+        print("\n6 - Tests a Hand with a Three of a Kind")
+        hand = Hand()
+        hand.cards.append(Card(Suit.CLUB, Value.ACE))
+        hand.cards.append(Card(Suit.DIAMOND, Value.ACE))
+        hand.cards.append(Card(Suit.DIAMOND, Value.TWO))
+        hand.cards.append(Card(Suit.SPADE, Value.ACE))
+        hand.cards.append(Card(Suit.HEART, Value.TEN))
+        res = poker.checkHandValue(hand)
+        print("6 - HAND VALUE: " + poker.handValueToString(res))
+        assert(res == 40)
+
+    def highCard():
+        print("\n7 - Tests a Hand with only a high card\n Highest Card is QUEEN")
+        hand = Hand()
+        hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.FIVE))
+        hand.cards.append(Card(Suit.DIAMOND, Value.TWO))
+        hand.cards.append(Card(Suit.SPADE, Value.SIX))
+        hand.cards.append(Card(Suit.HEART, Value.TEN))
+        res = poker.checkHandValue(hand)
+        print("7 - HAND VALUE: " + poker.handValueToString(res))
+        assert(res == 11)
+        
 
 #Main
 option = 0
@@ -279,6 +444,10 @@ while(option != 1 and option != 2):
             testCases.royalFlushHand()
             testCases.royalStraightFlushHand()
             testCases.lowValueAce()
+            testCases.pairHand()
+            testCases.regularStraight()
+            testCases.threeOfAKind()
+            testCases.highCard()
             print("\n<Testing Done>")
             break
     else:
