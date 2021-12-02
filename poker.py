@@ -98,56 +98,34 @@ class poker():
         hand = poker.sortHand(hand)
         if(hand.cards[0].value == Value.TEN):
             if(poker.checkStraight(hand)):
-                res = True
-                return res
+                return True
             else:
-                res = False
-                return res
+                return False
         
     
     #Check when a Flush is Straight
     def checkStraightFlush(hand):
-        res = False
-        if(poker.checkStraight(hand)):
-            res = True
-        else:
-            res = False
-        return res
+        return poker.checkStraight(hand)
     
     #Check when hand is Four of a Kind
     def checkFourOfAKind(count):
-        if(count == (4,1)):
-            return True
-        else:
-            return False
+        return count == (4,1)
     
     #Check when hand is Full House
     def checkFullHouse(count):
-        if(count == (3,2)):
-            return True
-        else:
-            return False
+        return count == (3,2)
     
     #Check when hand is Two Pairs
     def checkTwoPairs(count):
-        if(count == (2,2)):
-            return True
-        else:
-            return False
+        return count == (2,2)
     
     #Check when hand is Three of a Kind
     def checkThreeOfAKind(count):
-        if(count == (3,1)):
-            return True
-        else:
-            return False
+        return count == (3,1)
     
     #Check when hand is Pair
     def checkPair(count):
-        if(count == (2,1)):
-            return True
-        else:
-            return False
+        return count == (2,1)
 
     def checkHighCard(hand):
         highest = hand.cards[0]
@@ -184,16 +162,13 @@ class poker():
         if(poker.checkSameSuit(hand)):
             #Royal Flush
             if(poker.checkRoyalFlush(hand)):
-                value = 100
-                return value
+                return 100
             #Straight Flush
             elif(poker.checkStraightFlush(hand)):
-                value = 90
-                return value
+                return 90
             #Regular Flush
             else:
-                value = 60
-                return value
+                return 60
         #Other hands
         else:
             #Counting if hand is repeated
@@ -201,31 +176,24 @@ class poker():
             count = poker.countCards(hand)
             #Four of a Kind
             if(poker.checkFourOfAKind(count)):
-                value = 80
-                return value
+                return 80
             #Full House    
             elif(poker.checkFullHouse(count)):
-                value = 70
-                return value
+                return 70
             #Straight
             elif(poker.checkStraight(hand)):
-                value = 50
-                return value
+                return 50
             #Three of a Kind
             elif(poker.checkThreeOfAKind(count)):
-                value = 40
-                return value
+                return 40
             #Two Pairs
             elif(poker.checkTwoPairs(count)):
-                value = 30
-                return value
+                return 30
             #Single Pair
             elif(poker.checkPair(count)):
-                value = 20
-                return value
+                return 20
             else:
-                value = poker.checkHighCard(hand)
-                return value
+                return poker.checkHighCard(hand)
             
 
     def dealer(np):
@@ -322,7 +290,7 @@ class poker():
     def start():
         np = 0
         while ((int(np) <= 1) or (int(np) > 10)):  
-            np = input("Please, input the number of players that will partake in the game. Type 'quit' to end the execution.")
+            np = input("Please, input the number of players that will partake in the game. Type 'quit' to end the execution.\n Input: ")
             if(np.isnumeric()):
                 if((int(np) == 0)) or (int(np) < 0):
                     print("The number of players cannot be 0 or negative.")
@@ -340,7 +308,7 @@ class poker():
                     print("See you soon")
                     break
                 else:
-                    print("Please type a number or 'quit'")
+                    print("Please type a number or 'quit'.")
                     np = 0
 
 class testCases():
