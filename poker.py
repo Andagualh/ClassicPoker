@@ -39,7 +39,7 @@ class Card:
     def __gt__(self, other):
         return self.value.value > other.value.value
     def __eq__(self, other):
-        return self.value == other.value
+        return self.value == other.value and self.suit == other.suit
 
 #Deck Object    
 class Deck:
@@ -245,8 +245,6 @@ class poker():
             for c in range(5):
                 card = random.choice(deck.cards)
                 deck.cards.remove(card)
-                deckCheck = deck.cards
-                deckCheck.sort()
                 hand.cards.append(card)
             hands.append(hand)
         return hands
@@ -272,34 +270,34 @@ class poker():
                     highestHand = hands[i]
                     winner = i
         
-        print("The Player Number " + str(winner + 1) + " with the following hand:\n" + str(highestHand) + "\nis the winner of the round with a " + poker.handValueToString(storedHandValues[winner]))
+        print("The Player Number " + str(winner + 1) + " with the following hand:\n" + str(highestHand) + "\nis the winner of the round with " + poker.handValueToString(storedHandValues[winner]))
         poker.rounds(len(storedHandValues))
     
     #HandValue to String Auxiliary Function
     def handValueToString(handValue):
         possibleHands = {
-        100 : "Royal Flush",
-        90 : "Straight Flush",
-        80 : "Four of a Kind",
-        70 : "Full House",
-        60 : "Flush",
-        50 : "Straight",
-        40 : "Three of a Kind",
-        30 : "Two Pair",
-        20 : "Pair",
-        13 : "Ace",
-        12 : "King",
-        11 : "Queen",
-        10 : "Jack",
-        9 : "Ten",
-        8 : "Nine",
-        7 : "Eight",
-        6 : "Seven",
-        5 : "Six",
-        4 : "Five",
-        3 : "Four",
-        2 : "Three",
-        1 : "Two"
+        100 : "a Royal Flush",
+        90 : "a Straight Flush",
+        80 : "a Four of a Kind",
+        70 : "a Full House",
+        60 : "a Flush",
+        50 : "a Straight",
+        40 : "a Three of a Kind",
+        30 : "a Two Pair",
+        20 : "a Pair",
+        13 : "an Ace as the highest card",
+        12 : "a King as the highest card",
+        11 : "a Queen as the highest card",
+        10 : "a Jack as the highest card",
+        9 : "a Ten as the highest card",
+        8 : "a Nine as the highest card",
+        7 : "a Eight as the highest card",
+        6 : "a Seven as the highest card",
+        5 : "a Six as the highest card",
+        4 : "a Five as the highest card",
+        3 : "a Four as the highest card",
+        2 : "a Three as the highest card",
+        1 : "a Two as the highest card"
         }
         return possibleHands[handValue]
                     
@@ -325,14 +323,14 @@ class poker():
         np = 0
         while ((int(np) <= 1) or (int(np) > 10)):  
             np = input("Please, input the number of players that will partake in the game. Type 'quit' to end the execution.")
-            if(np.strip().isdecimal()):
+            if(np.isnumeric()):
                 if((int(np) == 0)) or (int(np) < 0):
                     print("The number of players cannot be 0 or negative.")
                 elif(int(np) == 1):
                     print("Company is okay, solitude is bliss. You have the winning hand in every round. \n Next time bring more friends.")
                 elif(int(np) > 10):
                     print("There isn't enough cards for this many players.")
-                elif(int(np)>1 and int(np)<10):
+                elif(int(np)>1 and int(np)<=10):
                     poker.rounds(np)
                     break
                 else:
