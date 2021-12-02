@@ -302,14 +302,17 @@ class poker():
                     poker.rounds(np)
                     break
                 else:
-                    print("Please, only introduce numbers or 'quit'.")
+                    print("Please, only introduce integers or 'quit'.")
             elif(np.strip().isalnum()):
                 if(str(np) == 'quit'):
                     print("See you soon")
                     break
                 else:
-                    print("Please type a number or 'quit'.")
+                    print("Please type an integer or 'quit'.")
                     np = 0
+            else:
+                print("Please type an integer or 'quit'.")
+                np = 0
 
 class testCases():
     def royalFlushHand():
