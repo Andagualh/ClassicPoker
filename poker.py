@@ -32,7 +32,7 @@ class Card:
         self.value = value
     
     def __repr__(self):
-        return f"{self.value} of {self.suit}"
+        return f"{self.value.name} of {self.suit.name}"
     
     def __lt__(self, other):
         return self.value.value < other.value.value
@@ -143,32 +143,34 @@ class poker():
         #Count Structure: (Number of Repeated Values, Amount of Sets with repeated values)
         most_common_values, count = zip(*counting_cards.most_common(2))
         return count
-            
+           
     #Controls the value of all the hands in play in Classic Poker
     #Hand values:
-    #Royal Flush - 100
-    #Straight Flush - 90
-    #Four of a Kind - 80
-    #Full House - 70
-    #Flush - 60
-    #Straight - 50
-    #Three of a Kind - 40
-    #Two Pair - 30
-    #Pair - 20
-    #High Card - From 2 to 13, check Value enum values for reference
+    #Royal Flush - 1000
+    #Straight Flush - 900 + highest card
+    #Four of a Kind - 800 
+    #Full House - 700 
+    #Flush - 600 
+    #Straight - 500 + highest card
+    #Three of a Kind - 400 
+    #Two Pair - 300 
+    #Pair - 200 
+    #High Card - From 2 to 13 (ACE), check Value enum values for reference
     def checkHandValue(hand):
         value = 0
+        for card in hand.cards:
+            value += card.value.value
         #Checking if hand has a flush
         if(poker.checkSameSuit(hand)):
             #Royal Flush
             if(poker.checkRoyalFlush(hand)):
-                return 100
+                return 1000
             #Straight Flush
             elif(poker.checkStraightFlush(hand)):
-                return 90
+                return 900 + poker.checkHighCard(hand)
             #Regular Flush
             else:
-                return 60
+                return 600
         #Other hands
         else:
             #Counting if hand is repeated
@@ -176,22 +178,22 @@ class poker():
             count = poker.countCards(hand)
             #Four of a Kind
             if(poker.checkFourOfAKind(count)):
-                return 80
+                return 800
             #Full House    
             elif(poker.checkFullHouse(count)):
-                return 70
-            #Straight
+                return 700
+            #Straight + 
             elif(poker.checkStraight(hand)):
-                return 50
+                return 500 + poker.checkHighCard(hand)
             #Three of a Kind
             elif(poker.checkThreeOfAKind(count)):
-                return 40
+                return 400
             #Two Pairs
             elif(poker.checkTwoPairs(count)):
-                return 30
+                return 300
             #Single Pair
             elif(poker.checkPair(count)):
-                return 20
+                return 200
             else:
                 return poker.checkHighCard(hand)
             
@@ -218,41 +220,76 @@ class poker():
         return hands
 
     #Round Resolver
-    def roundResolver(hands):
+    #To prevent Tests from requesting additional rounds an extra parameter is thrown in
+    def roundResolver(hands, isTest):
         storedHandValues = []
+        tie = False
         for hand in hands:
             storedHandValues.append(poker.checkHandValue(hand))
         
         highestValue = 0
         winner = 0
         for i in range (len(hands)):
+            #A hand just overtook one as the winner by its bare value
             if(storedHandValues[i] > highestValue):
                 highestHand = hands[i]
                 highestValue = storedHandValues[i]
                 winner = i
+                tie = False
             elif(storedHandValues[i] == highestValue):
-                current = poker.checkHighCard(highestHand)
-                evaluated = poker.checkHighCard(hands[i])
-                if(evaluated > current):
-                    highestValue = storedHandValues[i]
+                oneValue = poker.mostCommonOccurrence(highestHand)
+                twoValue = poker.mostCommonOccurrence(hands[i])
+                if(oneValue < twoValue):
                     highestHand = hands[i]
+                    highestValue = storedHandValues[i]
                     winner = i
+                    tie = False
+                elif(oneValue == twoValue):
+                    tiedwinner = i
+                    tiedhand = hands[i]
+                    tie = True
+        if(tie == False):
+            print("The Player Number " + str(winner + 1) + " with the following hand:\n" + str(highestHand) + "\nis the winner of the round with " + poker.handValueToString(storedHandValues[winner]))
+        elif(tie == True):
+            print("It's a tie between Player Number " + str(tiedwinner+1) + " and Player Number " + str(winner+1) + " with both having " + poker.handValueToString(highestValue))
+            print("Player " + str(tiedwinner+1) + " hand: \n" + str(tiedhand))
+            print("Player " + str(winner + i) + " hand: \n" + str(highestHand))
         
-        print("The Player Number " + str(winner + 1) + " with the following hand:\n" + str(highestHand) + "\nis the winner of the round with " + poker.handValueToString(storedHandValues[winner]))
-        poker.rounds(len(storedHandValues))
-    
+        if(isTest == False):
+            poker.rounds(len(storedHandValues))
+
+    #Find which are the repeated values in a hand to determine Pair, Three of a Kind and Four of a Kind values
+    def mostCommonOccurrence(hand):
+        handvalues = []
+        setValue = 0
+        for cardvalues in hand.cards:
+            handvalues.append(cardvalues.value.value)
+        counting_cards = Counter(handvalues)
+        most_common_values = counting_cards.most_common(2)
+        print(most_common_values)
+        for set in most_common_values:
+            if(set[1] > 1):
+                setValue += set[0]
+        return setValue
+
     #HandValue to String Auxiliary Function
     def handValueToString(handValue):
+        #check straights
+        if(handValue in range(900,999)):
+            handValue = 900
+        elif(handValue in range(500,599)):
+            handValue = 500
+        
         possibleHands = {
-        100 : "a Royal Flush",
-        90 : "a Straight Flush",
-        80 : "a Four of a Kind",
-        70 : "a Full House",
-        60 : "a Flush",
-        50 : "a Straight",
-        40 : "a Three of a Kind",
-        30 : "a Two Pair",
-        20 : "a Pair",
+        1000 : "a Royal Flush",
+        900 : "a Straight Flush",
+        800 : "a Four of a Kind",
+        700 : "a Full House",
+        600 : "a Flush",
+        500 : "a Straight",
+        400 : "a Three of a Kind",
+        300 : "a Two Pair",
+        200 : "a Pair",
         13 : "an Ace as the highest card",
         12 : "a King as the highest card",
         11 : "a Queen as the highest card",
@@ -266,9 +303,8 @@ class poker():
         3 : "a Four as the highest card",
         2 : "a Three as the highest card",
         1 : "a Two as the highest card"
-        }
+        }                                       
         return possibleHands[handValue]
-                    
 
     #Round Controller
     def rounds(np):
@@ -281,7 +317,7 @@ class poker():
             elif(quit.isalnum() and quit == 'y'):
                 print("Lets go: ")
                 hands = poker.dealer(np)
-                poker.roundResolver(hands)
+                poker.roundResolver(hands, False)
             else:
                 print("Please, type 'y' or 'n' only")
 
@@ -324,8 +360,8 @@ class testCases():
         hand.cards.append(Card(Suit.DIAMOND,Value.QUEEN))
         hand.cards.append(Card(Suit.DIAMOND,Value.KING))
         res = poker.checkHandValue(hand)
-        print("1 - HAND VALUE: " + poker.handValueToString(res))
-        assert(res == 100)
+        #print("1 - HAND VALUE: " + poker.handValueToString(res))
+        assert(res == 1000)
 
     def royalStraightFlushHand():
         print("\n2 - This is a straight flush test")
@@ -337,7 +373,7 @@ class testCases():
         hand.cards.append(Card(Suit.CLUB,Value.SIX))
         res = poker.checkHandValue(hand)
         print("2 - HAND VALUE: " + poker.handValueToString(res))
-        assert(res == 90)
+        assert(res == 905)
     
     def lowValueAce():
         print("\n3 - This tests the only case in which the ACE counts as a 1 value \nThis results in a Straight Flush")
@@ -349,7 +385,7 @@ class testCases():
         hand.cards.append(Card(Suit.CLUB,Value.TWO))
         res = poker.checkHandValue(hand)
         print("3 - HAND VALUE: " + poker.handValueToString(res))
-        assert(res == 90)
+        assert(res == 913)
     
     def regularStraight():
         print("\n4 - This is a straight test")
@@ -361,7 +397,7 @@ class testCases():
         hand.cards.append(Card(Suit.CLUB,Value.SIX))
         res = poker.checkHandValue(hand)
         print("4 - HAND VALUE: " + poker.handValueToString(res))
-        assert(res == 50)
+        assert(res == 505)
     
     def pairHand():
         print("\n5 - Tests a Hand with a Pair")
@@ -373,7 +409,7 @@ class testCases():
         hand.cards.append(Card(Suit.HEART, Value.TEN))
         res = poker.checkHandValue(hand)
         print("5 - HAND VALUE: " + poker.handValueToString(res))
-        assert(res == 20)
+        assert(res == 200)
 
     def threeOfAKind():
         print("\n6 - Tests a Hand with a Three of a Kind")
@@ -385,7 +421,7 @@ class testCases():
         hand.cards.append(Card(Suit.HEART, Value.TEN))
         res = poker.checkHandValue(hand)
         print("6 - HAND VALUE: " + poker.handValueToString(res))
-        assert(res == 40)
+        assert(res == 400)
 
     def highCard():
         print("\n7 - Tests a Hand with only a high card\n Highest Card is QUEEN")
@@ -398,6 +434,62 @@ class testCases():
         res = poker.checkHandValue(hand)
         print("7 - HAND VALUE: " + poker.handValueToString(res))
         assert(res == 11)
+    
+    def mostCommonOcurrenceTest():
+        print("\n8 - Tests a Hand to find its most common value")
+        hand = Hand()
+        hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.TWO))
+        hand.cards.append(Card(Suit.SPADE, Value.TWO))
+        hand.cards.append(Card(Suit.HEART, Value.TWO))
+        res = poker.mostCommonOccurrence(hand)
+        print("8 - MOST COMMON OCURRENCE: " + str(res))
+    
+    #Suits will be ignored in RoundResolver-like Tests
+    def testRoundResolver1():
+        print("9 - Two Full House hands tiebreaking test")
+        hand = Hand()
+        hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.THREE))
+        hand.cards.append(Card(Suit.SPADE, Value.THREE))
+        hand.cards.append(Card(Suit.HEART, Value.THREE))
+
+        hand2 = Hand()
+        hand2.cards.append(Card(Suit.CLUB, Value.QUEEN))
+        hand2.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
+        hand2.cards.append(Card(Suit.DIAMOND, Value.TWO))
+        hand2.cards.append(Card(Suit.SPADE, Value.TWO))
+        hand2.cards.append(Card(Suit.HEART, Value.TWO))
+
+        hands = []
+        hands.append(hand)
+        hands.append(hand2)
+        poker.roundResolver(hands, True)
+
+    def testRoundResolver2():
+        print("10 - Two Pair hands tiebreaking test")
+        hand = Hand()
+        hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
+        hand.cards.append(Card(Suit.DIAMOND, Value.THREE))
+        hand.cards.append(Card(Suit.SPADE, Value.THREE))
+        hand.cards.append(Card(Suit.HEART, Value.ACE))
+
+        hand2 = Hand()
+        hand2.cards.append(Card(Suit.CLUB, Value.QUEEN))
+        hand2.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
+        hand2.cards.append(Card(Suit.DIAMOND, Value.THREE))
+        hand2.cards.append(Card(Suit.SPADE, Value.THREE))
+        hand2.cards.append(Card(Suit.HEART, Value.ACE))
+
+        hands = []
+        hands.append(hand)
+        hands.append(hand2)
+        poker.roundResolver(hands, True)
+        
+
         
 
 #Main
@@ -417,6 +509,9 @@ while(option != 1 and option != 2):
             testCases.regularStraight()
             testCases.threeOfAKind()
             testCases.highCard()
+            testCases.mostCommonOcurrenceTest()
+            testCases.testRoundResolver1()
+            testCases.testRoundResolver2()
             print("\n<Testing Done>")
             break
     else:
