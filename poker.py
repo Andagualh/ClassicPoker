@@ -253,7 +253,7 @@ class poker():
         elif(tie == True):
             print("It's a tie between Player Number " + str(tiedwinner+1) + " and Player Number " + str(winner+1) + " with both having " + poker.handValueToString(highestValue))
             print("Player " + str(tiedwinner+1) + " hand: \n" + str(tiedhand))
-            print("Player " + str(winner + i) + " hand: \n" + str(highestHand))
+            print("Player " + str(winner + 1) + " hand: \n" + str(highestHand))
         
         if(isTest == False):
             poker.rounds(len(storedHandValues))
