@@ -481,21 +481,10 @@ class testCases():
         print("7 - HAND VALUE: " + poker.handValueToString(res))
         assert(res == 11)
     
-    def mostCommonOcurrenceTest():
-        print("\n8 - Tests a Hand to find its most common value")
-        hand = Hand()
-        hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
-        hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
-        hand.cards.append(Card(Suit.DIAMOND, Value.TWO))
-        hand.cards.append(Card(Suit.SPADE, Value.TWO))
-        hand.cards.append(Card(Suit.HEART, Value.TWO))
-        #res = poker.mostCommonOccurrence(hand)
-        #print("8 - MOST COMMON OCURRENCE: " + str(res))
-    
     #Suits will be ignored in RoundResolver-like Tests
     #TODO NEEDS ASSERT
     def testRoundResolver1():
-        print("9 - Two Full House hands tiebreaking test\n Results in Player 1 winning")
+        print("8 - Two Full House hands tiebreaking test\n Results in Player 1 winning")
         hand = Hand()
         hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
         hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
@@ -517,7 +506,7 @@ class testCases():
 
     #TODO NEEDS ASSERT
     def testRoundResolver2():
-        print("10 - Two Pair hands tiebreaking test\n Results in Tie")
+        print("9 - Two Pair hands tiebreaking test\n Results in Tie")
         hand = Hand()
         hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
         hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
