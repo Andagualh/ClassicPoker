@@ -3,13 +3,23 @@ import itertools
 
 from enum import Enum, auto
 from collections import Counter
+from copy import deepcopy
 
+#Used libraries:
+# Random - For dealing purposes
+# Enum - For Enummerate support
+# Counter - To count frequent values in a collection
+# Copy - To create inmutable copies of an object
+#If any of these libraries is missing you should type "pip install [library]" in which "[library]" is the library you want to install
+
+#Suit enummerate
 class Suit(Enum):
     CLUB = auto()
     DIAMOND = auto()
     HEART = auto()
     SPADE = auto()
 
+#Card Value enummerate
 class Value(Enum):
     TWO =  1
     THREE = 2
@@ -26,6 +36,8 @@ class Value(Enum):
     ACE = 13
 
 #Card Object
+#A card has a suit and a value
+#A card is equal to other one when their suits and values are the same
 class Card:
     def __init__(self, suit:Suit, value:Value):
         self.suit = suit
@@ -41,7 +53,8 @@ class Card:
     def __eq__(self, other):
         return self.value == other.value and self.suit == other.suit
 
-#Deck Object    
+#Deck Object
+#A deck is composed by an array of non-repeated cards, this can be changed.    
 class Deck:
     def __init__(self):
         self.cards = [Card(s,v) for s in Suit for v in Value]
@@ -50,6 +63,7 @@ class Deck:
         return "".join([f"{c}\n" for c in self.cards])
 
 #Hand Object
+#A hand is a shorter array of cards.
 class Hand:
     def __init__(self):
         self.cards = []
@@ -127,6 +141,7 @@ class poker():
     def checkPair(count):
         return count == (2,1)
 
+    #Returns the value of the highest hand in the hand
     def checkHighCard(hand):
         highest = hand.cards[0]
         for card in hand.cards:
@@ -166,6 +181,7 @@ class poker():
             if(poker.checkRoyalFlush(hand)):
                 return 1000
             #Straight Flush
+            #Check the highest card in the straight to solve possible ties
             elif(poker.checkStraightFlush(hand)):
                 return 900 + poker.checkHighCard(hand)
             #Regular Flush
@@ -182,7 +198,8 @@ class poker():
             #Full House    
             elif(poker.checkFullHouse(count)):
                 return 700
-            #Straight + 
+            #Straight
+            #Check the highest card in the straight to solve possible ties
             elif(poker.checkStraight(hand)):
                 return 500 + poker.checkHighCard(hand)
             #Three of a Kind
@@ -236,18 +253,34 @@ class poker():
                 highestValue = storedHandValues[i]
                 winner = i
                 tie = False
+            #Two hands have the same kind of set, time to inspect them
             elif(storedHandValues[i] == highestValue):
-                oneValue = poker.mostCommonOccurrence(highestHand)
-                twoValue = poker.mostCommonOccurrence(hands[i])
-                if(oneValue < twoValue):
+                #Extract a sum of the repeated values
+                #Example: 1 pair of ACES -> 13 + 13
+                reignFrecuency = poker.countCardsFrequency(highestHand)
+                contenderFrecuency = poker.countCardsFrequency(hands[i])
+                reignOccurrence = poker.mostCommonOccurrence(hand, reignFrecuency)
+                contenderOccurrence = poker.mostCommonOccurrence(hand , contenderFrecuency)
+                if(reignOccurrence < contenderOccurrence):
                     highestHand = hands[i]
                     highestValue = storedHandValues[i]
                     winner = i
                     tie = False
-                elif(oneValue == twoValue):
-                    tiedwinner = i
-                    tiedhand = hands[i]
-                    tie = True
+                #The winning set of cards are identical
+                elif(reignOccurrence == contenderOccurrence):
+                    #Delete winning sets to check for high values
+                    newHighestHand = poker.crushPairs(deepcopy(highestHand), reignFrecuency)
+                    newContenderHand = poker.crushPairs(deepcopy(hands[i]), contenderFrecuency)
+                    if(newContenderHand > newHighestHand):
+                        highestHand = hands[i]
+                        highestValue = storedHandValues[i]
+                        winner = i
+                        tie = False
+                    elif(newContenderHand == newHighestHand):
+                        tiedwinner = i
+                        tiedhand = hands[i]
+                        tie = True
+
         if(tie == False):
             print("The Player Number " + str(winner + 1) + " with the following hand:\n" + str(highestHand) + "\nis the winner of the round with " + poker.handValueToString(storedHandValues[winner]))
         elif(tie == True):
@@ -258,23 +291,36 @@ class poker():
         if(isTest == False):
             poker.rounds(len(storedHandValues))
 
-    #Find which are the repeated values in a hand to determine Pair, Three of a Kind and Four of a Kind values
-    def mostCommonOccurrence(hand):
+    #Find which are the 2 most repeated values in a hand
+    def countCardsFrequency(hand):
         handvalues = []
-        setValue = 0
         for cardvalues in hand.cards:
             handvalues.append(cardvalues.value.value)
         counting_cards = Counter(handvalues)
         most_common_values = counting_cards.most_common(2)
-        print(most_common_values)
+        return most_common_values
+
+    #Sums the CARD value of the two most common occurences
+    def mostCommonOccurrence(hand, most_common_values):
+        setValue = 0
         for set in most_common_values:
             if(set[1] > 1):
                 setValue += set[0]
         return setValue
+    
+    #Delete winning sets from a Hand and extracts its highest card
+    def crushPairs(hand, most_common_values):
+        for set in most_common_values:
+            if(set[1] > 1):
+                for card in hand.cards:
+                    if(card.value.value == set[0]):
+                        hand.cards.remove(card)
+        highcardvalue = poker.checkHighCard(hand)
+        return highcardvalue
 
     #HandValue to String Auxiliary Function
     def handValueToString(handValue):
-        #check straights
+        #Straight values are always in range to not incur into tie cases
         if(handValue in range(900,999)):
             handValue = 900
         elif(handValue in range(500,599)):
@@ -443,12 +489,13 @@ class testCases():
         hand.cards.append(Card(Suit.DIAMOND, Value.TWO))
         hand.cards.append(Card(Suit.SPADE, Value.TWO))
         hand.cards.append(Card(Suit.HEART, Value.TWO))
-        res = poker.mostCommonOccurrence(hand)
-        print("8 - MOST COMMON OCURRENCE: " + str(res))
+        #res = poker.mostCommonOccurrence(hand)
+        #print("8 - MOST COMMON OCURRENCE: " + str(res))
     
     #Suits will be ignored in RoundResolver-like Tests
+    #TODO NEEDS ASSERT
     def testRoundResolver1():
-        print("9 - Two Full House hands tiebreaking test")
+        print("9 - Two Full House hands tiebreaking test\n Results in Player 1 winning")
         hand = Hand()
         hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
         hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
@@ -468,8 +515,9 @@ class testCases():
         hands.append(hand2)
         poker.roundResolver(hands, True)
 
+    #TODO NEEDS ASSERT
     def testRoundResolver2():
-        print("10 - Two Pair hands tiebreaking test")
+        print("10 - Two Pair hands tiebreaking test\n Results in Tie")
         hand = Hand()
         hand.cards.append(Card(Suit.CLUB, Value.QUEEN))
         hand.cards.append(Card(Suit.DIAMOND, Value.QUEEN))
