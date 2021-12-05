@@ -546,16 +546,9 @@ while(option != 1 and option != 2):
             testCases.regularStraight()
             testCases.threeOfAKind()
             testCases.highCard()
-            testCases.mostCommonOcurrenceTest()
             testCases.testRoundResolver1()
             testCases.testRoundResolver2()
             print("\n<Testing Done>")
             break
     else:
         print("\n Please, choose a valid option from the menu")
-
-
-
-        
-    
-
