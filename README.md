@@ -31,6 +31,10 @@ The first thing that one will get prompted after the execution, will be the sele
 
 Selecting program execution will ask for the number of desired players, which only can be up to 10 due to deck structure limitations of the game.
 After selecting the number of players, the program will ask to start the round and will return the result of the round.
+The result of a round has two possible outcomes:
+- A player won the round on its own and his hand will be prompted in the trace along with the kind of winning hand or sets used.
+- There was a tie, both players hands will be prompted in the trace and the kind of winning hand or sets used.
+
 After a round has been resolved, the program will ask to start another round with the same number of players.
 
 Test Case Execution will execute the test written during the making of this program.
@@ -49,10 +53,12 @@ Write a program that runs different Poker rounds and rate which hand is the winn
 - The program only should deal the hands and choose which is the winner one. There is no player interaction of any kind.
 - The program has to run different rounds without requiring a restart.
 
-## Approach explanation and critique handleing
+## Approach explanation and possible improvements
 This is a heavily object based approach to the problem instead of a purely mathematical one. While a mathematical solution purely based on a variable reward depending on
 the value of the cards could have been much shorter, I felt like it would be trickier for me to understand when reading the code in the future. I also tried to incentivize 
 modularity between methods, trying to write certain methods with reusable code so extensibility might be easier.
+
+Test Cases might be improved by using a code coverage library, which I didn't had enough time to do, this might be one improvement to do in the future. Other improvement would be within the tie resolution code, which is quite messy due to the unique approach used.
 
 While this is not a justification of my code flaws, I felt right to communicate my thoughts at tackling this problem since it would be easier to answer frequent questions that
 might arise from reading the .py file. I am well aware that my approach might had the opposite effect of my intentions, I will read and review any critique made on this piece of
