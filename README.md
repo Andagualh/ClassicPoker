@@ -76,11 +76,13 @@ While this is not a justification of my code flaws, I felt right to communicate 
 might arise from reading the .py file. I am well aware that my approach might had the opposite effect of my intentions, I will read and review any critique made on this piece of
 code.
 
-## Code Snippets used
+## Code Snippets used and references
 Some of the code present in this script is heavily inspired by others works, here's a list of URLs consulted during the making of this script:
 
 - [Diego Salinas article in Towards Data Science about Texas Hold'Em scoring](https://towardsdatascience.com/poker-with-python-how-to-score-all-hands-in-texas-holdem-6fd750ef73d)
 - [Toby Speigh answer in a StackExchange question](https://codereview.stackexchange.com/questions/128702/poker-hands-in-python)
 - [Jim Mischel answer in a StackOverFlow question](https://stackoverflow.com/questions/42380183/algorithm-to-give-a-value-to-a-5-card-poker-hand)
 - [Unknown Author Card Player reference sheet for hand ranking](https://www.cardplayer.com/rules-of-poker/hand-rankings)
+- [Warren Wong article in Object Oriented Python Poker Approach](https://warrenwong.org/posts/object-oriented-playing-cards-in-python/)
+- [Sebastian Loehner answer in a StackOverFlow question](https://stackoverflow.com/questions/58091242/checking-if-theres-two-pairs-in-card-hand-python)
 
