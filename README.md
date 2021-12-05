@@ -23,7 +23,7 @@ On a terminal this can be done by using the following command:
 ```console
 python poker.py
 ```
-##Code Structure
+## Code Structure
 The script counts with various class on it that should be in mind when reading the code:
 
 - Suit Enumerate
